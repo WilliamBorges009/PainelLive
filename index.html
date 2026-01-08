@@ -1,34 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Painel Interativo Live</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#eaeaea;
+    transition:.3s;
+}
+body.dark{ background:#121212; }
+
+/* TÍTULO */
+.titulo-geral{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:1000;
+}
+.titulo-geral input{
+    font-size:30px;
+    font-weight:bold;
+    padding:10px 25px;
+    border-radius:12px;
+    border:none;
+    background:rgba(0,0,0,.7);
+    color:white;
+    text-align:center;
+    outline:none;
+    width:600px;
+    max-width:90vw;
+}
+
+/* BOTÕES */
+.top-buttons{
+    position:fixed;
+    top:50%;
+    right:20px;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    z-index:1000;
+}
+.top-buttons button{
+    padding:10px 15px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+/* CANDIDATOS */
+.center{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    display:flex;
+    gap:120px;
+}
+
+.candidato{
+    width:240px;
+    height:360px;
+    background:#1e1e1e;
+    border-radius:14px;
+    padding:12px;
+    color:white;
+    text-align:center;
+}
+
+.image-box{
+    width:100%;
+    height:180px;
+    background:#333;
+    border-radius:10px;
+    position:relative;
+    overflow:hidden;
+    margin-bottom:10px;
+}
+.image-box img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+/* MENU CONTEXTO */
+.context-menu{
+    position:fixed;
+    background:#222;
+    color:white;
+    border-radius:10px;
+    padding:5px 0;
+    display:none;
+    z-index:2000;
+}
+.context-menu div{
+    padding:8px 16px;
+    cursor:pointer;
+}
+.context-menu div:hover{
+    background:#444;
+}
+
+.votos{
+    font-size:30px;
     font-weight:bold;
     outline:none;
 }
-
-/* JANELAS EXTRAS */
-.window{
-    width:220px;
-    background:#1e1e1e;
-    border-radius:12px;
-    padding:10px;
-    color:white;
-    position:absolute;
-    cursor:move;
-}
-.window-header{
-    display:flex;
-    justify-content:space-between;
-    font-weight:bold;
-}
-.close{ color:red; cursor:pointer; }
 </style>
 </head>
 
 <body>
 
-<!-- TÍTULO -->
 <div class="titulo-geral">
     <input placeholder="Digite o título da votação">
 </div>
 
-<!-- BOTÕES -->
 <div class="top-buttons">
     <button onclick="toggleMode()">🌗 Fundo</button>
     <button onclick="changeVoteColor()">🎨 Cor dos votos</button>
@@ -36,29 +128,30 @@
     <button onclick="novaJanela()">➕ Nova Janela</button>
 </div>
 
-<!-- CANDIDATOS FIXOS -->
 <div class="center">
 
     <div class="candidato">
         <h3>Candidato 1</h3>
-        <div class="image-box"></div>
-        <button onclick="addImage(this)">+ Imagem</button>
+        <div class="image-box" oncontextmenu="openMenu(event,this)"></div>
         <div class="votos" contenteditable="true">Votos</div>
     </div>
 
     <div class="candidato">
         <h3>Candidato 2</h3>
-        <div class="image-box"></div>
-        <button onclick="addImage(this)">+ Imagem</button>
+        <div class="image-box" oncontextmenu="openMenu(event,this)"></div>
         <div class="votos" contenteditable="true">Votos</div>
     </div>
 
 </div>
 
+<div class="context-menu" id="menu"></div>
+
 <input type="color" id="colorPicker" style="display:none">
 <input type="color" id="titleColorPicker" style="display:none">
 
 <script>
+let targetBox=null;
+
 function toggleMode(){
     document.body.classList.toggle("dark");
 }
@@ -77,18 +170,44 @@ function changeTitleColor(){
         .style.color=p.value;
 }
 
-function addImage(btn){
+/* MENU BOTÃO DIREITO */
+function openMenu(e,box){
+    e.preventDefault();
+    targetBox=box;
+    const menu=document.getElementById("menu");
+    menu.innerHTML="";
+
+    if(box.querySelector("img")){
+        menu.innerHTML+=`<div onclick="addImage()">Trocar imagem</div>`;
+        menu.innerHTML+=`<div onclick="removeImage()">Remover imagem</div>`;
+    }else{
+        menu.innerHTML+=`<div onclick="addImage()">Adicionar imagem</div>`;
+    }
+
+    menu.style.left=e.clientX+"px";
+    menu.style.top=e.clientY+"px";
+    menu.style.display="block";
+}
+
+document.addEventListener("click",()=>{
+    document.getElementById("menu").style.display="none";
+});
+
+function addImage(){
     const input=document.createElement("input");
     input.type="file";
     input.accept="image/*";
     input.onchange=e=>{
         const img=document.createElement("img");
         img.src=URL.createObjectURL(e.target.files[0]);
-        const box=btn.previousElementSibling;
-        box.innerHTML="";
-        box.appendChild(img);
-    }
+        targetBox.innerHTML="";
+        targetBox.appendChild(img);
+    };
     input.click();
+}
+
+function removeImage(){
+    targetBox.innerHTML="";
 }
 
 /* JANELAS EXTRAS */
@@ -98,28 +217,9 @@ function novaJanela(){
     w.style.left="50px";
     w.style.top="200px";
     w.innerHTML=`
-        <div class="window-header">
-            <span>Janela</span>
-            <span class="close" onclick="this.parentElement.parentElement.remove()">✖</span>
-        </div>
-        <div class="image-box"></div>
-        <button onclick="addImage(this)">+ Imagem</button>
+        <div class="image-box" oncontextmenu="openMenu(event,this)"></div>
     `;
     document.body.appendChild(w);
-    drag(w);
-}
-
-function drag(el){
-    let x=0,y=0;
-    el.onmousedown=e=>{
-        x=e.clientX; y=e.clientY;
-        document.onmousemove=ev=>{
-            el.style.left=el.offsetLeft+(ev.clientX-x)+"px";
-            el.style.top =el.offsetTop +(ev.clientY-y)+"px";
-            x=ev.clientX; y=ev.clientY;
-        }
-        document.onmouseup=()=>document.onmousemove=null;
-    }
 }
 </script>
 

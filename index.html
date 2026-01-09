@@ -188,15 +188,17 @@ body.dark .top-buttons button{
 
 <div class="top-buttons">
     <button onclick="toggleMode()">🌗 Fundo</button>
-    <button onclick="changeVoteColor()">🎨 Cor dos votos</button>
     <button onclick="changeTitleColor()">🎨 Cor do título</button>
+    <button onclick="changeVoteColor()">🎨 Cor dos votos</button>
+    <button onclick="mudarCor(1)">🎨Cor Candidato 1</button>
+    <button onclick="mudarCor(2)">🎨Cor Candidato 2</button>
     <button onclick="novaJanela()">➕ Nova Janela</button>
 </div>
 
 <div class="center">
     <div class="candidato">
         
-        <div class="nome" contenteditable="true">Nome Candidato</div>
+        <div class="nome" id="nome1" contenteditable="true">Nome Candidato</div>
         
         <div class="image-box" oncontextmenu="openMenu(event,this)"></div>
         <div class="votos" contenteditable="true">Votos</div>
@@ -204,7 +206,7 @@ body.dark .top-buttons button{
 
     <div class="candidato">
         
-        <div class="nome" contenteditable="true">Nome Candidato</div>
+        <div class="nome" id="nome2" contenteditable="true">Nome Candidato</div>
         
         <div class="image-box" oncontextmenu="openMenu(event,this)"></div>
         <div class="votos" contenteditable="true">Votos</div>
@@ -322,6 +324,27 @@ document.addEventListener("touchmove",e=>{
 });
 document.addEventListener("mouseup",()=>dragTarget=null);
 document.addEventListener("touchend",()=>dragTarget=null);
+    /* CORES NOME CANDIDATO*/
+    
+function mudarCor(num) {
+    const nome = document.getElementById("nome" + num);
+    if (!nome) return;
+
+    const cores = [
+        "#000000", // preto
+        "#d32f2f", // vermelho
+        "#1976d2", // azul
+        "#388e3c", // verde
+        "#fbc02d", // amarelo
+        "#7b1fa2"  // roxo
+    ];
+
+    let indice = nome.dataset.corIndex || 0;
+    indice = (parseInt(indice) + 1) % cores.length;
+
+    nome.style.backgroundColor = cores[indice];
+    nome.dataset.corIndex = indice;
+}
 </script>
 
 </body>

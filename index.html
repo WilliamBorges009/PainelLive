@@ -326,25 +326,20 @@ document.addEventListener("mouseup",()=>dragTarget=null);
 document.addEventListener("touchend",()=>dragTarget=null);
     /* CORES NOME CANDIDATO*/
     
-function mudarCor(num) {
+/* COR DO NOME DO CANDIDATO (LETRA) */
+    
+function mudarCor(num){
     const nome = document.getElementById("nome" + num);
     if (!nome) return;
 
-    const cores = [
-        "#000000", // preto
-        "#d32f2f", // vermelho
-        "#1976d2", // azul
-        "#388e3c", // verde
-        "#fbc02d", // amarelo
-        "#7b1fa2"  // roxo
-    ];
+    const p = document.getElementById("colorPicker");
+    p.click();
 
-    let indice = nome.dataset.corIndex || 0;
-    indice = (parseInt(indice) + 1) % cores.length;
-
-    nome.style.backgroundColor = cores[indice];
-    nome.dataset.corIndex = indice;
+    p.oninput = () => {
+        nome.style.color = p.value;
+    };
 }
+
 </script>
 
 </body>
